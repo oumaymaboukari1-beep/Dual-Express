@@ -3,9 +3,7 @@ package com.dualexpress.controller;
 
 import com.dualexpress.model.Utilisateur;
 import com.dualexpress.repository.UtilisateurRepository;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +21,13 @@ public class AuthController {
             @RequestParam String email,
             @RequestParam String password
     ) {
-        Utilisateur u = utilisateurRepository.findByEmail(email)
-                .orElse(null);
+        Utilisateur u = utilisateurRepository.findByEmail(email).orElse(null);
 
         if (u == null) {
             return ResponseEntity.status(401).body("Email incorrect");
         }
 
+        // 🔥 Compare avec BCrypt
         if (!passwordEncoder.matches(password, u.getMotDePasse())) {
             return ResponseEntity.status(401).body("Mot de passe incorrect");
         }
@@ -40,7 +38,9 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Utilisateur user) {
 
+        // 🔥 Encode le mot de passe AVANT sauvegarde
         user.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+
         utilisateurRepository.save(user);
 
         return ResponseEntity.ok("Utilisateur créé !");

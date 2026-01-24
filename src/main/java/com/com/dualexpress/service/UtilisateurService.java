@@ -1,10 +1,10 @@
 
 package com.dualexpress.service;
 
-import com.dualexpress.model.*;
-import com.dualexpress.repository.*;
-import com.dualexpress.service.exceptions.ResourceNotFoundException;
+import com.dualexpress.model.Utilisateur;
+import com.dualexpress.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,34 +14,58 @@ import java.util.List;
 public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
 
+    //  AUTHENTIFICATION (déjà ok)
+    public boolean authentifier(String email, String password) {
+        return utilisateurRepository.findByEmail(email)
+                .map(u -> passwordEncoder.matches(password, u.getMotDePasse()))
+                .orElse(false);
+    }
+
+    //  CREATE
     public Utilisateur create(Utilisateur utilisateur) {
+        utilisateur.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
         return utilisateurRepository.save(utilisateur);
     }
 
+    // GET ALL
     public List<Utilisateur> getAll() {
         return utilisateurRepository.findAll();
     }
 
+    //  GET BY ID
     public Utilisateur getById(Long id) {
         return utilisateurRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+                .orElse(null);
     }
 
-    public Utilisateur update(Long id, Utilisateur data) {
-        Utilisateur u = getById(id);
 
-        u.setNom(data.getNom());
-        u.setAdresse(data.getAdresse());
-        u.setTelephone(data.getTelephone());
-        u.setEmail(data.getEmail());
+    public Utilisateur update(Long id, Utilisateur newUser) {
+        return utilisateurRepository.findById(id).map(u -> {
 
-        return utilisateurRepository.save(u);
+            u.setNom(newUser.getNom());
+            u.setEmail(newUser.getEmail());
+            u.setAdresse(newUser.getAdresse());
+            u.setTelephone(newUser.getTelephone());
+            u.setDisponibilite(newUser.getDisponibilite());
+            u.setRole(newUser.getRole());
+
+            // UPDATE PASSWORD IF CHANGED
+            if (newUser.getMotDePasse() != null && !newUser.getMotDePasse().isBlank()) {
+                u.setMotDePasse(passwordEncoder.encode(newUser.getMotDePasse()));
+            }
+
+            return utilisateurRepository.save(u);
+        }).orElse(null);
     }
 
-    public boolean authentifier(String email, String password) {
-        return utilisateurRepository.findByEmail(email)
-                .map(u -> u.authentifier(email, password))
-                .orElse(false);
+
+    public boolean delete(Long id) {
+        if (utilisateurRepository.existsById(id)) {
+            utilisateurRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
