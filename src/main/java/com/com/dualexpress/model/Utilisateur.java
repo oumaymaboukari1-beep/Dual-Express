@@ -1,6 +1,8 @@
 
 package com.dualexpress.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class Utilisateur {
  @ManyToOne
  private Role role;
 
- @OneToMany(mappedBy = "utilisateur")
+ @JsonBackReference
+ @OneToMany(mappedBy = "utilisateur", fetch=FetchType.LAZY)
  private List<Commande> missions = new ArrayList<>();
 }

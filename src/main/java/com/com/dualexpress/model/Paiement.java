@@ -1,6 +1,7 @@
 
 package com.dualexpress.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
@@ -26,9 +27,9 @@ public class Paiement {
     private String methodePaiement;
 
     @OneToOne
+    @JsonBackReference
     private Commande commande;
 
-    // ---------- MÉTHODES MÉTIER ----------
     public void effectuerPaiement() {
         this.statut = StatutPaiement.VALIDE;
         this.datePaiement = new Date();

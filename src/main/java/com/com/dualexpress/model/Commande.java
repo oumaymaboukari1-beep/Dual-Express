@@ -1,6 +1,7 @@
 
 package com.dualexpress.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -28,18 +29,22 @@ public class Commande {
  private String adresseLivraison;
 
  @ManyToOne
+ @JsonManagedReference
  private Utilisateur utilisateur;
 
  @ManyToOne
+ @JsonManagedReference
  private Restaurant restaurant;
 
  @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
+ @JsonManagedReference
  private List<LigneCommande> lignes = new ArrayList<>();
 
  @OneToOne(mappedBy = "commande", cascade = CascadeType.ALL)
+ @JsonManagedReference
  private Paiement paiement;
 
- // ---------- MÉTHODES MÉTIER ----------
+
 
  public double calculerTotal() {
   return lignes.stream()

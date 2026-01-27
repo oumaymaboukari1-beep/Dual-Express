@@ -1,6 +1,7 @@
 
 package com.dualexpress.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,12 +20,14 @@ public class LigneCommande {
     private Double prixUnitaire;
 
     @ManyToOne
+    @JsonManagedReference
     private Produit produit;
 
     @ManyToOne
+    @JsonManagedReference
     private Commande commande;
 
-    // ---------- MÉTHODES MÉTIER ----------
+
     public double calculerSousTotal() {
         return quantite * prixUnitaire;
     }

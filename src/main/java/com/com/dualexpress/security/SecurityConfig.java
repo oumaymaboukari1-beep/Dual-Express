@@ -28,7 +28,6 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(mvc.pattern("/h2-console/**")).permitAll()
                         .requestMatchers(mvc.pattern("/auth/**")).permitAll()
                         .requestMatchers(mvc.pattern("/v3/api-docs/**")).permitAll()
                         .requestMatchers(mvc.pattern("/swagger-ui/**")).permitAll()

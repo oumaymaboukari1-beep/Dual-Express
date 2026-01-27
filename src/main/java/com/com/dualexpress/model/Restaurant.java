@@ -1,6 +1,7 @@
 
 package com.dualexpress.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -26,13 +27,16 @@ public class Restaurant {
  private Double rating;
  private String imageUrl;
 
+
  @OneToMany(mappedBy = "restaurant")
- private List<Produit> produits = new ArrayList<>();
+ @JsonManagedReference
+ private List<Produit> produits;
+
 
  @OneToMany(mappedBy = "restaurant")
  private List<Commande> historique = new ArrayList<>();
 
- // ---------- MÉTHODES MÉTIER ----------
+
  public List<Produit> gererMenu() {
   return produits;
  }

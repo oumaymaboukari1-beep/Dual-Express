@@ -1,6 +1,7 @@
 
 package com.dualexpress.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import com.dualexpress.model.enums.Categorie;
@@ -25,6 +26,7 @@ public class Produit {
 
  private Boolean disponible;
 
+
  @ManyToOne
- private Restaurant restaurant;
-}
+ @JsonBackReference
+ private Restaurant restaurant;}
