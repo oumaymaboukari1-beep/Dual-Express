@@ -1,36 +1,47 @@
 
 package com.dualexpress.service;
 
+import com.dualexpress.dto.LigneCommandeDTO;
+import com.dualexpress.dto.request.LigneCommandeRequest;
+import com.dualexpress.mapper.LigneCommandeMapper;
+import com.dualexpress.model.Commande;
 import com.dualexpress.model.LigneCommande;
+import com.dualexpress.model.Produit;
+import com.dualexpress.repository.CommandeRepository;
 import com.dualexpress.repository.LigneCommandeRepository;
-import com.dualexpress.service.exceptions.ResourceNotFoundException;
-
+import com.dualexpress.repository.ProduitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class LigneCommandeService {
 
-    private final LigneCommandeRepository ligneCommandeRepository;
+    private final LigneCommandeRepository repo;
+    private final ProduitRepository produitRepo;
+    private final CommandeRepository commandeRepo;
 
-    // ----------- LIST ALL -----------
-    public List<LigneCommande> all() {
-        return ligneCommandeRepository.findAll();
-    }
+    public LigneCommandeDTO ajouterLigne(Long commandeId, LigneCommandeRequest req) {
 
-    // ----------- ADD -----------
-    public LigneCommande add(LigneCommande lc) {
-        return ligneCommandeRepository.save(lc);
-    }
+        Commande c = commandeRepo.findById(commandeId)
+                .orElseThrow(() -> new RuntimeException("Commande introuvable"));
 
-    // ----------- DELETE -----------
-    public void delete(Long id) {
-        LigneCommande lc = ligneCommandeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("LigneCommande introuvable : " + id));
+        Produit p = produitRepo.findById(req.getProduitId())
+                .orElseThrow(() -> new RuntimeException("Produit introuvable"));
 
-        ligneCommandeRepository.delete(lc);
+        LigneCommande lc = LigneCommande.builder()
+                .commande(c)
+                .produit(p)
+                .quantite(req.getQuantite())
+                .prixUnitaire(p.getPrix())
+                .build();
+
+        repo.save(lc);
+
+        c.getLignes().add(lc);
+        c.setMontantTotal(c.calculerTotal());
+        commandeRepo.save(c);
+
+        return LigneCommandeMapper.toDTO(lc);
     }
 }

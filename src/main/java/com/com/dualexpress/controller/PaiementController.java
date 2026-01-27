@@ -1,7 +1,8 @@
 
 package com.dualexpress.controller;
 
-import com.dualexpress.model.Paiement;
+import com.dualexpress.dto.PaiementDTO;
+import com.dualexpress.dto.request.PaiementRequest;
 import com.dualexpress.service.PaiementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PaiementController {
 
-    private final PaiementService paiementService;
+    private final PaiementService service;
 
-    @PostMapping("/{id}/payer")
-    public ResponseEntity<Paiement> effectuerPaiement(@PathVariable Long id) {
-        return ResponseEntity.ok(paiementService.effectuerPaiement(id));
+    @PostMapping
+    public ResponseEntity<PaiementDTO> payer(@RequestBody PaiementRequest req) {
+        return ResponseEntity.ok(service.payer(req));
     }
 }

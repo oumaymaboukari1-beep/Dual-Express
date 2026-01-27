@@ -1,34 +1,25 @@
+
 package com.dualexpress.controller;
 
-
-import com.dualexpress.model.LigneCommande;
+import com.dualexpress.dto.LigneCommandeDTO;
+import com.dualexpress.dto.request.LigneCommandeRequest;
 import com.dualexpress.service.LigneCommandeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/lignes")
-@CrossOrigin
+@RequiredArgsConstructor
 public class LigneCommandeController {
 
     private final LigneCommandeService service;
 
-    public LigneCommandeController(LigneCommandeService service) {
-        this.service = service;
-    }
+    @PostMapping("/{commandeId}")
+    public ResponseEntity<LigneCommandeDTO> addLigne(
+            @PathVariable Long commandeId,
+            @RequestBody LigneCommandeRequest req) {
 
-    @GetMapping
-    public List<LigneCommande> all() { return service.all(); }
-
-    @PostMapping
-    public LigneCommande add(@RequestBody LigneCommande lc) {
-        return service.add(lc);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+        return ResponseEntity.ok(service.ajouterLigne(commandeId, req));
     }
 }
-

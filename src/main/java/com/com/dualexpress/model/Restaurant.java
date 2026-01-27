@@ -1,7 +1,7 @@
 
 package com.dualexpress.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -9,13 +9,12 @@ import java.util.List;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Restaurant {
 
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
  private String nomRestaurant;
@@ -27,27 +26,10 @@ public class Restaurant {
  private Double rating;
  private String imageUrl;
 
+ @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+ private List<Produit> produits = new ArrayList<>();
 
- @OneToMany(mappedBy = "restaurant")
- @JsonManagedReference
- private List<Produit> produits;
-
-
- @OneToMany(mappedBy = "restaurant")
- private List<Commande> historique = new ArrayList<>();
-
-
- public List<Produit> gererMenu() {
-  return produits;
- }
-
- public void ajouterProduit(Produit produit) {
-  produits.add(produit);
-  produit.setRestaurant(this);
- }
-
- public void supprimerProduit(Produit produit) {
-  produits.remove(produit);
-  produit.setRestaurant(null);
- }
+ @JsonIgnore
+ @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+ private List<Commande> commandes = new ArrayList<>();
 }

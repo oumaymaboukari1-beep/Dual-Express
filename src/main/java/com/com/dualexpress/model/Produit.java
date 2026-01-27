@@ -1,20 +1,19 @@
 
 package com.dualexpress.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.dualexpress.model.enums.Categorie;
 import jakarta.persistence.*;
 import lombok.*;
-import com.dualexpress.model.enums.Categorie;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Produit {
 
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
  private String nom;
@@ -26,7 +25,7 @@ public class Produit {
 
  private Boolean disponible;
 
-
  @ManyToOne
- @JsonBackReference
- private Restaurant restaurant;}
+ @JsonIgnore
+ private Restaurant restaurant;
+}

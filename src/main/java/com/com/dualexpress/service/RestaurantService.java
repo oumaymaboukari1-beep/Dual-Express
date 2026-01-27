@@ -1,12 +1,12 @@
 
 package com.dualexpress.service;
 
-import com.dualexpress.model.Restaurant;
+import com.dualexpress.dto.RestaurantDTO;
+import com.dualexpress.mapper.RestaurantMapper;
 import com.dualexpress.model.Produit;
-import com.dualexpress.repository.RestaurantRepository;
+import com.dualexpress.model.Restaurant;
 import com.dualexpress.repository.ProduitRepository;
-import com.dualexpress.service.exceptions.ResourceNotFoundException;
-
+import com.dualexpress.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,34 +16,30 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RestaurantService {
 
-    private final RestaurantRepository restaurantRepository;
-    private final ProduitRepository produitRepository;
+    private final RestaurantRepository repo;
+    private final ProduitRepository produitRepo;
 
-    public Restaurant create(Restaurant r) {
-        return restaurantRepository.save(r);
+    public RestaurantDTO create(Restaurant restaurant) {
+        repo.save(restaurant);
+        return RestaurantMapper.toDTO(restaurant);
     }
 
-    public List<Restaurant> getAll() {
-        return restaurantRepository.findAll();
+    public List<RestaurantDTO> getAll() {
+        return repo.findAll().stream()
+                .map(RestaurantMapper::toDTO)
+                .toList();
     }
 
-    public Restaurant getById(Long id) {
-        return restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant introuvable"));
+    public RestaurantDTO getById(Long id) {
+        return repo.findById(id)
+                .map(RestaurantMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Restaurant introuvable"));
     }
 
     public void ajouterProduit(Long restaurantId, Produit produit) {
-        Restaurant r = getById(restaurantId);
-        r.ajouterProduit(produit);
-        restaurantRepository.save(r);
-    }
-
-    public void supprimerProduit(Long restaurantId, Long produitId) {
-        Restaurant r = getById(restaurantId);
-        Produit p = produitRepository.findById(produitId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
-
-        r.supprimerProduit(p);
-        restaurantRepository.save(r);
+        Restaurant r = repo.findById(restaurantId)
+                .orElseThrow();
+        produit.setRestaurant(r);
+        produitRepo.save(produit);
     }
 }

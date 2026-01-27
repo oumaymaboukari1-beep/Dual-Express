@@ -1,8 +1,8 @@
 
 package com.dualexpress.controller;
 
-import com.dualexpress.model.Commande;
-import com.dualexpress.model.LigneCommande;
+import com.dualexpress.dto.CommandeDTO;
+import com.dualexpress.dto.request.CommandeRequest;
 import com.dualexpress.service.CommandeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,32 +13,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CommandeController {
 
-    private final CommandeService commandeService;
+    private final CommandeService service;
 
-    @PostMapping("/create")
-    public ResponseEntity<Commande> create(
-            @RequestParam Long userId,
-            @RequestParam Long restaurantId,
-            @RequestBody Commande commande
-    ) {
-        return ResponseEntity.ok(commandeService.create(userId, restaurantId, commande));
-    }
-
-    @PostMapping("/{id}/lignes")
-    public ResponseEntity<LigneCommande> addLigne(
-            @PathVariable Long id,
-            @RequestBody LigneCommande lc
-    ) {
-        return ResponseEntity.ok(commandeService.ajouterLigne(id, lc));
-    }
-
-    @PostMapping("/{id}/valider")
-    public ResponseEntity<Commande> valider(@PathVariable Long id) {
-        return ResponseEntity.ok(commandeService.valider(id));
+    @PostMapping
+    public ResponseEntity<CommandeDTO> create(@RequestBody CommandeRequest req) {
+        return ResponseEntity.ok(service.create(req));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Commande> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(commandeService.getById(id));
+    public ResponseEntity<CommandeDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 }

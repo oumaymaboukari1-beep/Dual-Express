@@ -1,6 +1,10 @@
-
 package com.dualexpress.service;
 
+import com.dualexpress.dto.UtilisateurDTO;
+import com.dualexpress.dto.request.LoginRequest;
+import com.dualexpress.dto.request.RegisterRequest;
+import com.dualexpress.dto.response.LoginResponse;
+import com.dualexpress.mapper.UtilisateurMapper;
 import com.dualexpress.model.Role;
 import com.dualexpress.model.Utilisateur;
 import com.dualexpress.repository.RoleRepository;
@@ -19,78 +23,60 @@ public class UtilisateurService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // LOGIN
-    public boolean authentifier(String email, String password) {
-        return utilisateurRepository.findByEmail(email)
-                .map(u -> passwordEncoder.matches(password, u.getMotDePasse()))
-                .orElse(false);
-    }
+    /* ---------- REGISTER ---------- */
+    public String register(RegisterRequest req) {
 
-    // CREATE USER
-    public Utilisateur create(Utilisateur utilisateur) {
+        if (utilisateurRepository.findByEmail(req.getEmail()).isPresent()) {
+            throw new RuntimeException("Email déjà utilisé !");
+        }
 
-        // Charger le rôle depuis la BD
-        Role r = roleRepository.findById(utilisateur.getRole().getId())
+        Role role = roleRepository.findById(req.getRoleId())
                 .orElseThrow(() -> new RuntimeException("Role introuvable"));
 
-        utilisateur.setRole(r);
+        Utilisateur user = Utilisateur.builder()
+                .nom(req.getNom())
+                .email(req.getEmail())
+                .motDePasse(passwordEncoder.encode(req.getMotDePasse()))
+                .telephone(req.getTelephone())
+                .adresse(req.getAdresse())
+                .role(role)
+                .disponibilite(role.getRole().equalsIgnoreCase("LIVREUR"))
+                .build();
 
-        boolean estLivreur = r.getRole().equalsIgnoreCase("LIVREUR");
+        utilisateurRepository.save(user);
 
-        // Si non livreur -> disponibilite = null
-        if (!estLivreur) {
-            utilisateur.setDisponibilite(null);
+        return "Utilisateur créé avec succès !";
+    }
+
+    /* ---------- LOGIN ---------- */
+    public LoginResponse login(LoginRequest req) {
+
+        Utilisateur user = utilisateurRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email incorrect"));
+
+        if (!passwordEncoder.matches(req.getMotDePasse(), user.getMotDePasse())) {
+            throw new RuntimeException("Mot de passe incorrect");
         }
 
-        // Encoder le password
-        utilisateur.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
-
-        return utilisateurRepository.save(utilisateur);
+        return LoginResponse.builder()
+                .id(user.getId())
+                .nom(user.getNom())
+                .role(user.getRole().getRole())
+                .build();
     }
 
-    public List<Utilisateur> getAll() {
-        return utilisateurRepository.findAll();
+    /* ---------- GET ALL USERS ---------- */
+    public List<UtilisateurDTO> getAll() {
+        return utilisateurRepository.findAll()
+                .stream()
+                .map(UtilisateurMapper::toDTO)
+                .toList();
     }
 
-    public Utilisateur getById(Long id) {
-        return utilisateurRepository.findById(id).orElse(null);
-    }
-
-    // UPDATE USER
-    public Utilisateur update(Long id, Utilisateur newUser) {
-        return utilisateurRepository.findById(id).map(u -> {
-
-            u.setNom(newUser.getNom());
-            u.setEmail(newUser.getEmail());
-            u.setAdresse(newUser.getAdresse());
-            u.setTelephone(newUser.getTelephone());
-
-            // Charger nouveau rôle
-            Role r = roleRepository.findById(newUser.getRole().getId())
-                    .orElseThrow(() -> new RuntimeException("Role introuvable"));
-            u.setRole(r);
-
-            boolean estLivreur = r.getRole().equalsIgnoreCase("LIVREUR");
-
-            if (estLivreur) {
-                u.setDisponibilite(newUser.getDisponibilite());
-            } else {
-                u.setDisponibilite(null);
-            }
-
-            if (newUser.getMotDePasse() != null && !newUser.getMotDePasse().isBlank()) {
-                u.setMotDePasse(passwordEncoder.encode(newUser.getMotDePasse()));
-            }
-
-            return utilisateurRepository.save(u);
-        }).orElse(null);
-    }
-
-    public boolean delete(Long id) {
-        if (utilisateurRepository.existsById(id)) {
-            utilisateurRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    /* ---------- GET USER ---------- */
+    public UtilisateurDTO getById(Long id) {
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+        return UtilisateurMapper.toDTO(u);
     }
 }

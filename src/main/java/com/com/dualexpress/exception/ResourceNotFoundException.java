@@ -1,4 +1,4 @@
-package com.dualexpress.service.exceptions;
+package com.dualexpress.exception;
 
 
 public class ResourceNotFoundException extends RuntimeException {

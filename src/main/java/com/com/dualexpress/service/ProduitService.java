@@ -1,11 +1,14 @@
 
 package com.dualexpress.service;
 
+import com.dualexpress.dto.ProduitDTO;
+import com.dualexpress.dto.request.ProduitRequest;
+import com.dualexpress.mapper.ProduitMapper;
 import com.dualexpress.model.Produit;
+import com.dualexpress.model.Restaurant;
 import com.dualexpress.model.enums.Categorie;
 import com.dualexpress.repository.ProduitRepository;
-import com.dualexpress.service.exceptions.ResourceNotFoundException;
-
+import com.dualexpress.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,26 +18,42 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProduitService {
 
-    private final ProduitRepository produitRepository;
+    private final ProduitRepository repo;
+    private final RestaurantRepository restaurantRepo;
 
-    public Produit create(Produit p) {
-        return produitRepository.save(p);
+    public ProduitDTO create(ProduitRequest req) {
+
+        Restaurant r = restaurantRepo.findById(req.getRestaurantId())
+                .orElseThrow(() -> new RuntimeException("Restaurant introuvable"));
+
+        Produit p = Produit.builder()
+                .nom(req.getNom())
+                .description(req.getDescription())
+                .prix(req.getPrix())
+                .categorie(Categorie.valueOf(req.getCategorie()))
+                .disponible(req.getDisponible())
+                .restaurant(r)
+                .build();
+
+        repo.save(p);
+        return ProduitMapper.toDTO(p);
     }
 
-    public List<Produit> getAll() {
-        return produitRepository.findAll();
+    public List<ProduitDTO> getAll() {
+        return repo.findAll().stream()
+                .map(ProduitMapper::toDTO)
+                .toList();
     }
 
-    public Produit getById(Long id) {
-        return produitRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
+    public List<ProduitDTO> getByCategorie(String cat) {
+        return repo.findByCategorie(Categorie.valueOf(cat))
+                .stream().map(ProduitMapper::toDTO)
+                .toList();
     }
 
-    public List<Produit> getDisponibles() {
-        return produitRepository.findByDisponibleTrue();
-    }
-
-    public List<Produit> getByCategorie(Categorie categorie) {
-        return produitRepository.findByCategorie(categorie);
+    public List<ProduitDTO> getDisponibles() {
+        return repo.findByDisponibleTrue().stream()
+                .map(ProduitMapper::toDTO)
+                .toList();
     }
 }

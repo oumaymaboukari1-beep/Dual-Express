@@ -1,32 +1,29 @@
 
 package com.dualexpress.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LigneCommande {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Integer quantite;
     private Double prixUnitaire;
 
     @ManyToOne
-    @JsonManagedReference
     private Produit produit;
 
     @ManyToOne
-    @JsonManagedReference
+    @JsonIgnore
     private Commande commande;
-
 
     public double calculerSousTotal() {
         return quantite * prixUnitaire;

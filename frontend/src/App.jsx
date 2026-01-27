@@ -1,14 +1,21 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import Cart from "./components/Cart";
+import Checkout from "./pages/Checkout";
+import Products from "./pages/Products";
 
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
-import AppRoutes from "./routes/AppRoutes";
-
-export default function App() {
+function App() {
     return (
-        <>
-            <Navbar />
-            <Sidebar />
-            <AppRoutes />
-        </>
+        <CartProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                </Routes>
+            </BrowserRouter>
+        </CartProvider>
     );
 }
+
+export default App;

@@ -1,11 +1,12 @@
 
 package com.dualexpress.service;
 
+import com.dualexpress.dto.CommandeDTO;
+import com.dualexpress.dto.request.CommandeRequest;
+import com.dualexpress.mapper.CommandeMapper;
 import com.dualexpress.model.*;
 import com.dualexpress.model.enums.StatutCommande;
 import com.dualexpress.repository.*;
-import com.dualexpress.service.exceptions.ResourceNotFoundException;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,51 +16,36 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class CommandeService {
 
-    private final CommandeRepository commandeRepository;
-    private final UtilisateurRepository utilisateurRepository;
-    private final RestaurantRepository restaurantRepository;
-    private final LigneCommandeRepository ligneCommandeRepository;
+    private final CommandeRepository repo;
+    private final UtilisateurRepository utilisateurRepo;
+    private final RestaurantRepository restaurantRepo;
+    private final LigneCommandeRepository ligneRepo;
 
-    public Commande create(Long userId, Long restaurantId, Commande commande) {
+    public CommandeDTO create(CommandeRequest req) {
 
-        Utilisateur u = utilisateurRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable"));
+        Utilisateur user = utilisateurRepo.findById(req.getUtilisateurId())
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        Restaurant r = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant introuvable"));
+        Restaurant rest = restaurantRepo.findById(req.getRestaurantId())
+                .orElseThrow(() -> new RuntimeException("Restaurant introuvable"));
 
-        commande.setUtilisateur(u);
-        commande.setRestaurant(r);
-        commande.setDateCommande(new Date());
-        commande.setStatut(StatutCommande.EN_COURS);
+        Commande c = Commande.builder()
+                .dateCommande(new Date())
+                .statut(StatutCommande.EN_COURS)
+                .adresseLivraison(req.getAdresseLivraison())
+                .restaurant(rest)
+                .utilisateur(user)
+                .montantTotal(7.0) // frais de livraison
+                .build();
 
-        return commandeRepository.save(commande);
+        repo.save(c);
+
+        return CommandeMapper.toDTO(c);
     }
 
-    public LigneCommande ajouterLigne(Long commandeId, LigneCommande lc) {
-        Commande c = commandeRepository.findById(commandeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Commande introuvable"));
-
-        lc.setCommande(c);
-
-        ligneCommandeRepository.save(lc);
-
-        c.getLignes().add(lc);
-        c.setMontantTotal(c.calculerTotal());
-
-        commandeRepository.save(c);
-
-        return lc;
-    }
-
-    public Commande valider(Long id) {
-        Commande c = getById(id);
-        c.validerCommande();
-        return commandeRepository.save(c);
-    }
-
-    public Commande getById(Long id) {
-        return commandeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Commande introuvable"));
+    public CommandeDTO getById(Long id) {
+        return repo.findById(id)
+                .map(CommandeMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Commande introuvable"));
     }
 }

@@ -1,8 +1,8 @@
 
 package com.dualexpress.controller;
 
-import com.dualexpress.model.Produit;
-import com.dualexpress.model.enums.Categorie;
+import com.dualexpress.dto.ProduitDTO;
+import com.dualexpress.dto.request.ProduitRequest;
 import com.dualexpress.service.ProduitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,30 +15,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProduitController {
 
-    private final ProduitService produitService;
+    private final ProduitService service;
 
     @PostMapping
-    public ResponseEntity<Produit> create(@RequestBody Produit p) {
-        return ResponseEntity.ok(produitService.create(p));
+    public ResponseEntity<ProduitDTO> create(@RequestBody ProduitRequest req) {
+        return ResponseEntity.ok(service.create(req));
     }
 
     @GetMapping
-    public ResponseEntity<List<Produit>> getAll() {
-        return ResponseEntity.ok(produitService.getAll());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Produit> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(produitService.getById(id));
-    }
-
-    @GetMapping("/disponibles")
-    public ResponseEntity<List<Produit>> getDisponibles() {
-        return ResponseEntity.ok(produitService.getDisponibles());
+    public ResponseEntity<List<ProduitDTO>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/categorie/{cat}")
-    public ResponseEntity<List<Produit>> getByCategorie(@PathVariable Categorie cat) {
-        return ResponseEntity.ok(produitService.getByCategorie(cat));
+    public ResponseEntity<List<ProduitDTO>> getByCat(@PathVariable String cat) {
+        return ResponseEntity.ok(service.getByCategorie(cat));
+    }
+
+    @GetMapping("/disponibles")
+    public ResponseEntity<List<ProduitDTO>> getDisp() {
+        return ResponseEntity.ok(service.getDisponibles());
     }
 }

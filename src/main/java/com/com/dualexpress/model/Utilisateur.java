@@ -1,8 +1,7 @@
 
 package com.dualexpress.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -10,13 +9,12 @@ import java.util.List;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Utilisateur {
 
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
  private String nom;
@@ -27,12 +25,12 @@ public class Utilisateur {
 
  private String telephone;
  private String adresse;
- private Boolean disponibilite;
+ private Boolean disponibilite; // uniquement livreur
 
  @ManyToOne
  private Role role;
 
- @JsonBackReference
- @OneToMany(mappedBy = "utilisateur", fetch=FetchType.LAZY)
- private List<Commande> missions = new ArrayList<>();
+ @JsonIgnore
+ @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
+ private List<Commande> commandes = new ArrayList<>();
 }
