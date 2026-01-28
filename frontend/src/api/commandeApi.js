@@ -1,8 +1,17 @@
+// src/api/commandeApi.js
+import api from "./axios";
 
-import api from "./axiosConfig";
+export const createCommande = async (data) => {
+    const res = await api.post("/commandes", data);
+    return res.data;
+};
 
-export const getCommandes = () => api.get("/commandes");
-export const getCommande = (id) => api.get(`/commandes/${id}`);
-export const addCommande = (data) => api.post("/commandes", data);
-export const updateCommande = (id, data) => api.put(`/commandes/${id}`, data);
-export const deleteCommande = (id) => api.delete(`/commandes/${id}`);
+export const getCommande = async (id) => {
+    const res = await api.get(`/commandes/${id}`);
+    return res.data;
+};
+
+export const getAllCommandes = async () => {
+    const res = await api.get("/commandes");
+    return res.data;
+};

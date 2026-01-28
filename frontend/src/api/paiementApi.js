@@ -1,8 +1,10 @@
+// src/api/paiementApi.js
+import api from "./axios";
 
-import api from "./axiosConfig";
-
-export const getPaiements = () => api.get("/paiements");
-export const getPaiement = (id) => api.get(`/paiements/${id}`);
-export const addPaiement = (data) => api.post("/paiements", data);
-export const updatePaiement = (id, data) => api.put(`/paiements/${id}`, data);
-export const deletePaiement = (id) => api.delete(`/paiements/${id}`);
+export const payer = async (commandeId, methodePaiement) => {
+    const res = await api.post("/paiements", {
+        commandeId,
+        methodePaiement,
+    });
+    return res.data;
+};

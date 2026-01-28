@@ -1,89 +1,44 @@
-
+// src/pages/restaurants/RestaurantDetails.jsx
 import { useEffect, useState } from "react";
-import {
-    getLigneCommande,
-    updateLigneCommande,
-} from "../../api/ligneCommandeApi";
-import { Box, Button, TextField } from "@mui/material";
+import { getRestaurantById } from "../../api/restaurantApi";
+import api from "../../api/axios";
 import { useParams } from "react-router-dom";
+import { useCartStore } from "../../store/cartStore.jsx";
 
 export default function RestaurantDetails() {
     const { id } = useParams();
-
-    const [form, setForm] = useState({
-        quantite: "",
-        prix: "",
-        commandeId: "",
-        produitId: "",
-    });
+    const [restaurant, setRestaurant] = useState(null);
+    const [produits, setProduits] = useState([]);
+    const addItem = useCartStore((s) => s.addItem);
 
     useEffect(() => {
-        load();
-    }, []);
+        getRestaurantById(id).then(setRestaurant);
+        api.get(`/produits?restaurantId=${id}`).then((res) => setProduits(res.data));
+    }, [id]);
 
-    const load = async () => {
-        const res = await getLigneCommande(id);
-        setForm(res.data);
-    };
-
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await updateLigneCommande(id, form);
-        window.location.href = "/ligne-commandes";
-    };
+    if (!restaurant) return <p>Chargement...</p>;
 
     return (
-        <Box sx={{ paddingLeft: 260, paddingTop: 100, width: 400 }}>
-            <h2>Modifier Ligne de Commande</h2>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold">{restaurant.nomRestaurant}</h1>
+            <p className="text-gray-600">{restaurant.description}</p>
 
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    name="quantite"
-                    type="number"
-                    value={form.quantite}
-                    onChange={handleChange}
-                    label="Quantité"
-                    fullWidth
-                    margin="normal"
-                />
+            <div className="grid grid-cols-3 gap-4 mt-6">
+                {produits.map((p) => (
+                    <div key={p.id} className="border rounded p-4 shadow">
+                        <h3 className="font-bold">{p.nom}</h3>
+                        <p className="text-gray-600">{p.description}</p>
+                        <p className="font-semibold text-green-600">{p.prix} TND</p>
 
-                <TextField
-                    name="prix"
-                    type="number"
-                    value={form.prix}
-                    onChange={handleChange}
-                    label="Prix (DT)"
-                    fullWidth
-                    margin="normal"
-                />
-
-                <TextField
-                    name="commandeId"
-                    type="number"
-                    value={form.commandeId}
-                    onChange={handleChange}
-                    label="Commande ID"
-                    fullWidth
-                    margin="normal"
-                />
-
-                <TextField
-                    name="produitId"
-                    type="number"
-                    value={form.produitId}
-                    onChange={handleChange}
-                    label="Produit ID"
-                    fullWidth
-                    margin="normal"
-                />
-
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                    Modifier
-                </Button>
-            </form>
-        </Box>
+                        <button
+                            className="btn-primary mt-2"
+                            onClick={() => addItem({ ...p, quantite: 1 })}
+                        >
+                            Ajouter au panier
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }

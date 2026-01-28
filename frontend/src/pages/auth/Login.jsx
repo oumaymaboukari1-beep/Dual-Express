@@ -12,25 +12,36 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const user = await login({ email, motDePasse });
-        setUser(user);
-        navigate("/");
+        try {
+            const user = await login({ email, motDePasse });
+            setUser(user);
+            navigate("/");
+        } catch (err) {
+            alert("Email ou mot de passe incorrect");
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-6">
-            <input
-                className="input"
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                className="input"
-                placeholder="Mot de passe"
-                type="password"
-                onChange={(e) => setMotDePasse(e.target.value)}
-            />
-            <button className="btn">Se connecter</button>
-        </form>
+        <div className="flex justify-center items-center h-screen bg-gray-100">
+            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-96">
+                <h1 className="text-xl font-bold mb-4">Connexion</h1>
+
+                <input
+                    type="email"
+                    placeholder="Email"
+                    className="input w-full mb-3"
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+
+                <input
+                    type="password"
+                    placeholder="Mot de passe"
+                    className="input w-full mb-3"
+                    onChange={(e) => setMotDePasse(e.target.value)}
+                />
+
+                <button className="btn-primary w-full">Se connecter</button>
+            </form>
+        </div>
     );
 }

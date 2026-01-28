@@ -1,8 +1,12 @@
+// src/api/restaurantApi.js
+import api from "./axios";
 
-import api from "./axiosConfig";
+export const getRestaurants = async () => {
+    const res = await api.get("/restaurants");
+    return res.data;
+};
 
-export const getRestaurants = () => api.get("/restaurants");
-export const getRestaurant = (id) => api.get(`/restaurants/${id}`);
-export const addRestaurant = (data) => api.post("/restaurants", data);
-export const updateRestaurant = (id, data) => api.put(`/restaurants/${id}`, data);
-export const deleteRestaurant = (id) => api.delete(`/restaurants/${id}`);
+export const getRestaurantById = async (id) => {
+    const res = await api.get(`/restaurants/${id}`);
+    return res.data;
+};

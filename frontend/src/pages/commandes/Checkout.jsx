@@ -1,79 +1,49 @@
-
+// src/pages/commandes/Checkout.jsx
+import { useCartStore } from "../../store/cartStore.jsx";
+import { useUserStore } from "../../store/userStore";
+import { createCommande } from "../../api/commandeApi";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { addPaiement } from "../../api/paiementApi";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
 
 export default function Checkout() {
-    const [form, setForm] = useState({
-        montant: "",
-        datePaiement: "",
-        statut: "",
-        commandeId: "",
-    });
+    const cart = useCartStore((s) => s.items);
+    const clearCart = useCartStore((s) => s.clear);
+    const user = useUserStore((s) => s.user);
+    const navigate = useNavigate();
+    const [adresse, setAdresse] = useState("");
 
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
+    const handleOrder = async () => {
+        const restaurantId = cart[0].restaurantId; // même restaurant
+        const lignes = cart.map((p) => ({
+            produitId: p.id,
+            quantite: p.quantite,
+        }));
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await addPaiement(form);
-        window.location.href = "/paiements";
+        const data = {
+            utilisateurId: user.id,
+            restaurantId,
+            adresseLivraison: adresse,
+            lignes,
+        };
+
+        const cmd = await createCommande(data);
+        clearCart();
+        navigate(`/commande/${cmd.id}`);
     };
 
     return (
-        <Box sx={{ paddingLeft: 260, paddingTop: 100, width: 400 }}>
-            <h2>Ajouter un Paiement</h2>
+        <div className="p-6">
+            <h1 className="text-xl font-bold mb-4">Finaliser la commande</h1>
 
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    name="montant"
-                    type="number"
-                    label="Montant"
-                    fullWidth
-                    margin="normal"
-                    value={form.montant}
-                    onChange={handleChange}
-                />
+            <input
+                placeholder="Adresse de livraison"
+                className="input w-full mb-3"
+                onChange={(e) => setAdresse(e.target.value)}
+            />
 
-                <TextField
-                    name="datePaiement"
-                    type="datetime-local"
-                    label="Date paiement"
-                    fullWidth
-                    margin="normal"
-                    InputLabelProps={{ shrink: true }}
-                    value={form.datePaiement}
-                    onChange={handleChange}
-                />
-
-                <TextField
-                    name="statut"
-                    select
-                    label="Statut"
-                    fullWidth
-                    margin="normal"
-                    value={form.statut}
-                    onChange={handleChange}
-                >
-                    <MenuItem value="EN_ATTENTE">En attente</MenuItem>
-                    <MenuItem value="PAYE">Payé</MenuItem>
-                    <MenuItem value="REFUSE">Refusé</MenuItem>
-                </TextField>
-
-                <TextField
-                    name="commandeId"
-                    type="number"
-                    label="Commande ID"
-                    fullWidth
-                    margin="normal"
-                    value={form.commandeId}
-                    onChange={handleChange}
-                />
-
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                    Ajouter
-                </Button>
-            </form>
-        </Box>
+            <button className="btn-primary" onClick={handleOrder}>
+                Passer la commande
+            </button>
+        </div>
     );
 }

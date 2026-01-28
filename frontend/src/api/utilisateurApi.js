@@ -1,19 +1,12 @@
+// src/api/utilisateurApi.js
+import api from "./axios";
 
-import api from "./axiosConfig";
-
-/**
- * Récupérer la liste de tous les utilisateurs
- */
-export const getUtilisateurs = () => {
-    return api.get("/utilisateurs");
+export const getUsers = async () => {
+    const res = await api.get("/utilisateurs");
+    return res.data;
 };
 
-/**
- * Récupérer un utilisateur par ID
- */
-export const getUtilisateur = (id) => {
-    return api.get(`/utilisateurs/${id}`);
+export const getUserById = async (id) => {
+    const res = await api.get(`/utilisateurs/${id}`);
+    return res.data;
 };
-
-/**
- *

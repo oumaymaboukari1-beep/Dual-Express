@@ -1,71 +1,23 @@
-
+// src/pages/products/ProductList.jsx
 import { useEffect, useState } from "react";
-import { getProduits, deleteProduit } from "../../api/produitApi";
-import DataTable from "../../components/DataTable";
-import { Button } from "@mui/material";
+import api from "../../api/axios";
 
-export default function ListeProduits() {
-    const [rows, setRows] = useState([]);
-
-    const load = async () => {
-        const res = await getProduits();
-        setRows(res.data);
-    };
+export default function ProductList() {
+    const [produits, setProduits] = useState([]);
 
     useEffect(() => {
-        load();
+        api.get("/produits").then((res) => setProduits(res.data));
     }, []);
 
-    const handleDelete = async (id) => {
-        await deleteProduit(id);
-        load();
-    };
-
-    const columns = [
-        { field: "id", headerName: "ID", width: 80 },
-        { field: "nom", headerName: "Nom", width: 200 },
-        { field: "description", headerName: "Description", width: 250 },
-        { field: "prix", headerName: "Prix (DT)", width: 150 },
-        { field: "categorie", headerName: "Catégorie", width: 150 },
-        {
-            field: "actions",
-            headerName: "Actions",
-            width: 220,
-            renderCell: (params) => (
-                <>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{ mr: 1 }}
-                        onClick={() => (window.location.href = `/produits/edit/${params.row.id}`)}
-                    >
-                        Modifier
-                    </Button>
-
-                    <Button
-                        variant="contained"
-                        size="small"
-                        color="error"
-                        onClick={() => handleDelete(params.row.id)}
-                    >
-                        Supprimer
-                    </Button>
-                </>
-            ),
-        },
-    ];
-
     return (
-        <div style={{ paddingLeft: 260, paddingTop: 100 }}>
-            <h2>Produits</h2>
-            <DataTable rows={rows} columns={columns} />
-            <Button
-                variant="contained"
-                sx={{ mt: 2 }}
-                onClick={() => (window.location.href = "/produits/add")}
-            >
-                Ajouter un produit
-            </Button>
+        <div className="p-6 grid grid-cols-3 gap-6">
+            {produits.map((p) => (
+                <div key={p.id} className="border rounded p-4 shadow">
+                    <h3 className="font-bold">{p.nom}</h3>
+                    <p>{p.description}</p>
+                    <p className="text-green-600">{p.prix} TND</p>
+                </div>
+            ))}
         </div>
     );
 }

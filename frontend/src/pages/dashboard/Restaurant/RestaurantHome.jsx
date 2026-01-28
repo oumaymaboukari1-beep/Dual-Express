@@ -1,65 +1,24 @@
-
-import { useState } from "react";
-import { addRestaurant } from "../../../api/restaurantApi.js";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
+// src/pages/dashboard/restaurant/RestaurantHome.jsx
+import { Link } from "react-router-dom";
+import { useUserStore } from "../../../store/userStore";
 
 export default function RestaurantHome() {
-    const [form, setForm] = useState({
-        nom: "",
-        adresse: "",
-        categorie: "",
-    });
-
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await addRestaurant(form);
-        window.location.href = "/restaurants";
-    };
+    const user = useUserStore((s) => s.user);
 
     return (
-        <Box sx={{ paddingLeft: 260, paddingTop: 100, width: 400 }}>
-            <h2>Ajouter un Restaurant</h2>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold">Espace Restaurant 🍽️</h1>
+            <p className="mt-2">Gérez vos produits et vos commandes.</p>
 
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    fullWidth
-                    label="Nom"
-                    name="nom"
-                    value={form.nom}
-                    onChange={handleChange}
-                    margin="normal"
-                />
+            <div className="mt-6 space-y-4">
+                <Link className="btn-primary" to="/restaurant/produits">
+                    Gérer mes produits
+                </Link>
 
-                <TextField
-                    fullWidth
-                    label="Adresse"
-                    name="adresse"
-                    value={form.adresse}
-                    onChange={handleChange}
-                    margin="normal"
-                />
-
-                <TextField
-                    fullWidth
-                    select
-                    label="Catégorie"
-                    name="categorie"
-                    value={form.categorie}
-                    onChange={handleChange}
-                    margin="normal"
-                >
-                    <MenuItem value="FAST_FOOD">Fast Food</MenuItem>
-                    <MenuItem value="TRADITIONNEL">Traditionnel</MenuItem>
-                    <MenuItem value="SUSHI">Sushi</MenuItem>
-                </TextField>
-
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                    Ajouter
-                </Button>
-            </form>
-        </Box>
+                <Link className="btn-secondary" to="/restaurant/commandes">
+                    Gérer mes commandes
+                </Link>
+            </div>
+        </div>
     );
 }

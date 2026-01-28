@@ -1,40 +1,23 @@
-
-import { useState } from "react";
-import { addRole } from "../../../api/roleApi.js";
-import { Box, Button, TextField } from "@mui/material";
+// src/pages/dashboard/client/ClientHome.jsx
+import { Link } from "react-router-dom";
+import { useUserStore } from "../../../store/userStore";
 
 export default function ClientHome() {
-    const [form, setForm] = useState({
-        nom: "",
-    });
-
-    const handleChange = (e) =>
-        setForm({ ...form, nom: e.target.value });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await addRole(form);
-        window.location.href = "/roles";
-    };
+    const user = useUserStore((s) => s.user);
 
     return (
-        <Box sx={{ paddingLeft: 260, paddingTop: 100, width: 400 }}>
-            <h2>Ajouter un Rôle</h2>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold">Bienvenue {user?.nom} 👋</h1>
 
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    label="Nom du rôle"
-                    name="nom"
-                    fullWidth
-                    margin="normal"
-                    value={form.nom}
-                    onChange={handleChange}
-                />
+            <div className="mt-6 space-y-4">
+                <Link className="btn-primary" to="/">
+                    Voir les restaurants
+                </Link>
 
-                <Button variant="contained" type="submit" sx={{ mt: 2 }}>
-                    Ajouter
-                </Button>
-            </form>
-        </Box>
+                <Link className="btn-secondary" to="/client/commandes">
+                    Mes commandes
+                </Link>
+            </div>
+        </div>
     );
 }

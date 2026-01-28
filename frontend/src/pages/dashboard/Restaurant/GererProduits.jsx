@@ -1,76 +1,79 @@
-
+// src/pages/dashboard/restaurant/GererProduits.jsx
 import { useEffect, useState } from "react";
-import { getRestaurant, updateRestaurant } from "../../../api/restaurantApi.js";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
-import { useParams } from "react-router-dom";
+import api from "../../../api/axios";
+import { useUserStore } from "../../../store/userStore";
 
 export default function GererProduits() {
-    const { id } = useParams();
+    const [produits, setProduits] = useState([]);
     const [form, setForm] = useState({
         nom: "",
-        adresse: "",
-        categorie: "",
+        description: "",
+        prix: "",
+        categorie: "PLAT",
+        disponible: true,
     });
 
-    useEffect(() => {
-        load();
-    }, []);
+    const user = useUserStore((s) => s.user);
 
-    const load = async () => {
-        const res = await getRestaurant(id);
-        setForm(res.data);
+    const loadProduits = () => {
+        api.get("/produits").then((res) => {
+            const filtered = res.data.filter(
+                (p) => p.restaurantId === user.id
+            );
+            setProduits(filtered);
+        });
     };
 
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
+    useEffect(() => {
+        loadProduits();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await updateRestaurant(id, form);
-        window.location.href = "/restaurants";
+
+        await api.post("/produits", {
+            ...form,
+            prix: parseFloat(form.prix),
+            restaurantId: user.id,
+        });
+
+        loadProduits();
     };
 
     return (
-        <Box sx={{ paddingLeft: 260, paddingTop: 100, width: 400 }}>
-            <h2>Modifier Restaurant</h2>
+        <div className="p-6">
+            <h1 className="text-xl font-bold">Gérer mes produits</h1>
 
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    fullWidth
-                    label="Nom"
-                    name="nom"
-                    value={form.nom}
-                    onChange={handleChange}
-                    margin="normal"
-                />
+            <form onSubmit={handleSubmit} className="mt-4 grid grid-cols-2 gap-4">
+                <input name="nom" placeholder="Nom" className="input" onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+                <input name="prix" placeholder="Prix" className="input" onChange={(e) => setForm({ ...form, prix: e.target.value })} />
+                <input name="description" placeholder="Description" className="input col-span-2" onChange={(e) => setForm({ ...form, description: e.target.value })} />
 
-                <TextField
-                    fullWidth
-                    label="Adresse"
-                    name="adresse"
-                    value={form.adresse}
-                    onChange={handleChange}
-                    margin="normal"
-                />
-
-                <TextField
-                    fullWidth
-                    select
-                    label="Catégorie"
-                    name="categorie"
-                    value={form.categorie}
-                    onChange={handleChange}
-                    margin="normal"
+                <select
+                    className="input"
+                    onChange={(e) => setForm({ ...form, categorie: e.target.value })}
                 >
-                    <MenuItem value="FAST_FOOD">Fast Food</MenuItem>
-                    <MenuItem value="TRADITIONNEL">Traditionnel</MenuItem>
-                    <MenuItem value="SUSHI">Sushi</MenuItem>
-                </TextField>
+                    <option value="PLAT">Plat</option>
+                    <option value="BOISSON">Boisson</option>
+                    <option value="DESSERT">Dessert</option>
+                    <option value="AUTRE">Autre</option>
+                </select>
 
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                    Modifier
-                </Button>
+                <button className="btn-primary col-span-2">Ajouter produit</button>
             </form>
-        </Box>
+
+            <div className="mt-6">
+                <h2 className="font-bold">Mes produits :</h2>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                    {produits.map((p) => (
+                        <div key={p.id} className="border p-4 rounded shadow">
+                            <h3 className="font-bold">{p.nom}</h3>
+                            <p>{p.description}</p>
+                            <p className="text-green-600">{p.prix} TND</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 }

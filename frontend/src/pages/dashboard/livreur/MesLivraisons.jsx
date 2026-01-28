@@ -1,99 +1,30 @@
-
+// src/pages/dashboard/livreur/MesLivraisons.jsx
 import { useEffect, useState } from "react";
-import { getUtilisateur, updateUtilisateur } from "../../../api/utilisateurApi.js";
-import { Box, Button, TextField, MenuItem } from "@mui/material";
-import { useParams } from "react-router-dom";
+import api from "../../../api/axios";
 
 export default function MesLivraisons() {
-    const { id } = useParams();
-
-    const [form, setForm] = useState({
-        nom: "",
-        email: "",
-        motDePasse: "",
-        role: "",
-        telephone: "",
-    });
-
-    const load = async () => {
-        const res = await getUtilisateur(id);
-        setForm(res.data);
-    };
+    const [commandes, setCommandes] = useState([]);
 
     useEffect(() => {
-        load();
+        api.get("/commandes").then((res) => {
+            const enCours = res.data.filter((c) => c.statut === "EN_COURS");
+            setCommandes(enCours);
+        });
     }, []);
 
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await updateUtilisateur(id, form);
-        window.location.href = "/utilisateurs";
-    };
-
     return (
-        <Box sx={{ paddingLeft: 260, paddingTop: 100, width: 450 }}>
-            <h2>Modifier Utilisateur</h2>
+        <div className="p-6">
+            <h1 className="text-xl font-bold">Mes livraisons</h1>
 
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    name="nom"
-                    label="Nom"
-                    fullWidth
-                    margin="normal"
-                    value={form.nom}
-                    onChange={handleChange}
-                />
-
-                <TextField
-                    name="email"
-                    type="email"
-                    label="Email"
-                    fullWidth
-                    margin="normal"
-                    value={form.email}
-                    onChange={handleChange}
-                />
-
-                <TextField
-                    name="motDePasse"
-                    type="password"
-                    label="Mot de passe"
-                    fullWidth
-                    margin="normal"
-                    value={form.motDePasse}
-                    onChange={handleChange}
-                />
-
-                <TextField
-                    name="role"
-                    select
-                    label="Rôle"
-                    fullWidth
-                    margin="normal"
-                    value={form.role}
-                    onChange={handleChange}
-                >
-                    <MenuItem value="ADMIN">Admin</MenuItem>
-                    <MenuItem value="CLIENT">Client</MenuItem>
-                    <MenuItem value="LIVREUR">Livreur</MenuItem>
-                </TextField>
-
-                <TextField
-                    name="telephone"
-                    label="Téléphone"
-                    fullWidth
-                    margin="normal"
-                    value={form.telephone}
-                    onChange={handleChange}
-                />
-
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                    Modifier
-                </Button>
-            </form>
-        </Box>
+            <div className="mt-6 space-y-4">
+                {commandes.map((cmd) => (
+                    <div key={cmd.id} className="border rounded p-4 shadow">
+                        <p>Commande #{cmd.id}</p>
+                        <p>Adresse : {cmd.adresseLivraison}</p>
+                        <p>Total : {cmd.montantTotal} TND</p>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
