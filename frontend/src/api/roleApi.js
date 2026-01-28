@@ -1,4 +1,4 @@
-import Login from "../pages/Login.jsx";
+import Login from "../pages/auth/Login.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
 
 <Route path="/utilisateurs" element={<ListeUtilisateurs />} />
