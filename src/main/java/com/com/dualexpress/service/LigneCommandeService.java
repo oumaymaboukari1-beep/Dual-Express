@@ -1,4 +1,3 @@
-
 package com.dualexpress.service;
 
 import com.dualexpress.dto.LigneCommandeDTO;
@@ -12,6 +11,7 @@ import com.dualexpress.repository.LigneCommandeRepository;
 import com.dualexpress.repository.ProduitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +21,7 @@ public class LigneCommandeService {
     private final ProduitRepository produitRepo;
     private final CommandeRepository commandeRepo;
 
+    @Transactional
     public LigneCommandeDTO ajouterLigne(Long commandeId, LigneCommandeRequest req) {
 
         Commande c = commandeRepo.findById(commandeId)
@@ -33,13 +34,19 @@ public class LigneCommandeService {
                 .commande(c)
                 .produit(p)
                 .quantite(req.getQuantite())
-                .prixUnitaire(p.getPrix())
+                .prixUnitaire(p.getPrix()) // BigDecimal ✅
                 .build();
 
+        // 1) save ligne
         repo.save(lc);
 
+        // 2) attach to commande list
         c.getLignes().add(lc);
-        c.setMontantTotal(c.calculerTotal());
+
+        // 3) recalc total (sum lignes + frais livraison)
+        c.recalculerEtMajTotal();
+
+        // 4) save commande
         commandeRepo.save(c);
 
         return LigneCommandeMapper.toDTO(lc);

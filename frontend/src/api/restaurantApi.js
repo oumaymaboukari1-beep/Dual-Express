@@ -1,4 +1,4 @@
-// src/api/restaurantApi.js
+// ✅ AUCUN JSX ICI
 import api from "./axios";
 
 export const getRestaurants = async () => {

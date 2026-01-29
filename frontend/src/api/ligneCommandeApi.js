@@ -1,5 +1,5 @@
 
-import api from "./axiosConfig";
+import api from "./axios.js";
 
 export const getLignesCommande = () => api.get("/ligne-commandes");
 export const getLigneCommande = (id) => api.get(`/ligne-commandes/${id}`);

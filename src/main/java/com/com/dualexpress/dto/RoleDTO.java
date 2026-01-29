@@ -1,4 +1,3 @@
-
 package com.dualexpress.dto;
 
 import lombok.*;

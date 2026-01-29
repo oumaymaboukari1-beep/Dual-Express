@@ -10,7 +10,6 @@ import com.dualexpress.model.Utilisateur;
 import com.dualexpress.repository.RoleRepository;
 import com.dualexpress.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
 
     /* ---------- REGISTER ---------- */
     public String register(RegisterRequest req) {
@@ -31,37 +29,36 @@ public class UtilisateurService {
         }
 
         Role role = roleRepository.findById(req.getRoleId())
-                .orElseThrow(() -> new RuntimeException("Role introuvable"));
+                .orElseThrow(() -> new RuntimeException("Rôle introuvable"));
 
         Utilisateur user = Utilisateur.builder()
                 .nom(req.getNom())
                 .email(req.getEmail())
-                .motDePasse(passwordEncoder.encode(req.getMotDePasse()))
+                .motDePasse(req.getMotDePasse()) // PAS CRYPTÉ
                 .telephone(req.getTelephone())
                 .adresse(req.getAdresse())
                 .role(role)
-                .disponibilite(role.getRole().equalsIgnoreCase("LIVREUR"))
+                .disponibilite(
+                        role.getRole().equalsIgnoreCase("LIVREUR")
+                )
                 .build();
 
         utilisateurRepository.save(user);
 
-        return "Utilisateur créé avec succès !";
+        return "Utilisateur créé avec succès";
     }
 
     /* ---------- LOGIN ---------- */
     public LoginResponse login(LoginRequest req) {
 
-        Utilisateur user = utilisateurRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email incorrect"));
-
-        if (!passwordEncoder.matches(req.getMotDePasse(), user.getMotDePasse())) {
-            throw new RuntimeException("Mot de passe incorrect");
-        }
+        Utilisateur user = utilisateurRepository
+                .findByEmailAndMotDePasse(req.getEmail(), req.getMotDePasse())
+                .orElseThrow(() -> new RuntimeException("Email ou mot de passe incorrect"));
 
         return LoginResponse.builder()
                 .id(user.getId())
                 .nom(user.getNom())
-                .role(user.getRole().getRole())
+                .role(user.getRole().getRole()) // ADMIN / CLIENT / RESTAURANT / LIVREUR
                 .build();
     }
 
@@ -73,7 +70,7 @@ public class UtilisateurService {
                 .toList();
     }
 
-    /* ---------- GET USER ---------- */
+    /* ---------- GET USER BY ID ---------- */
     public UtilisateurDTO getById(Long id) {
         Utilisateur u = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));

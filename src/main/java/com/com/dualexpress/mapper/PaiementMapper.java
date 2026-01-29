@@ -1,4 +1,3 @@
-
 package com.dualexpress.mapper;
 
 import com.dualexpress.dto.PaiementDTO;
@@ -11,9 +10,9 @@ public class PaiementMapper {
                 .id(p.getId())
                 .montant(p.getMontant())
                 .datePaiement(p.getDatePaiement())
-                .statut(p.getStatut().toString())
-                .methodePaiement(p.getMethodePaiement())
-                .commandeId(p.getCommande().getId())
+                .statut(p.getStatut().name())
+                .methodePaiement(p.getMethodePaiement().name())
+                .commandeId(p.getCommande() != null ? p.getCommande().getId() : null)
                 .build();
     }
 }

@@ -1,45 +1,66 @@
-
 package com.dualexpress.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.dualexpress.model.enums.StatutCommande;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Commande {
 
- @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Id
+ @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
+ @Temporal(TemporalType.TIMESTAMP)
  private Date dateCommande;
 
  @Enumerated(EnumType.STRING)
  private StatutCommande statut;
 
- private Double montantTotal;
+ @Column(nullable = false, precision = 10, scale = 2)
+ private BigDecimal montantTotal;
+
+ @Column(nullable = false, precision = 10, scale = 2)
+ private BigDecimal fraisLivraison;
+
  private String adresseLivraison;
 
- @ManyToOne
+ @ManyToOne(optional = false)
  private Utilisateur utilisateur;
 
- @ManyToOne
+ @ManyToOne(optional = false)
  private Restaurant restaurant;
 
- @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
+ @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
+ @Builder.Default
  private List<LigneCommande> lignes = new ArrayList<>();
 
  @OneToOne(mappedBy = "commande", cascade = CascadeType.ALL)
  private Paiement paiement;
 
- public double calculerTotal() {
-  return lignes.stream()
-          .mapToDouble(LigneCommande::calculerSousTotal)
-          .sum() + 7.0; // frais livraison
+ /** Calcule le total: somme(lignes) + fraisLivraison */
+ public BigDecimal calculerTotal() {
+  BigDecimal sousTotal = lignes == null ? BigDecimal.ZERO :
+          lignes.stream()
+                  .map(LigneCommande::calculerSousTotal) // doit retourner BigDecimal
+                  .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+  BigDecimal frais = (fraisLivraison == null) ? BigDecimal.ZERO : fraisLivraison;
+
+  return sousTotal.add(frais).setScale(2, RoundingMode.HALF_UP);
+ }
+
+ /** Recalcule et met à jour montantTotal */
+ public void recalculerEtMajTotal() {
+  this.montantTotal = calculerTotal();
  }
 }

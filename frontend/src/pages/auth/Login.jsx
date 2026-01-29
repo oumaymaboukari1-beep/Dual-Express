@@ -1,47 +1,36 @@
-// src/pages/auth/Login.jsx
-import { useState } from "react";
-import { login } from "../../api/authApi";
-import { useUserStore } from "../../store/userStore";
-import { useNavigate } from "react-router-dom";
-
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [motDePasse, setMotDePasse] = useState("");
-    const setUser = useUserStore((s) => s.login);
-    const navigate = useNavigate();
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const user = await login({ email, motDePasse });
-            setUser(user);
-            navigate("/");
-        } catch (err) {
-            alert("Email ou mot de passe incorrect");
-        }
-    };
-
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-96">
-                <h1 className="text-xl font-bold mb-4">Connexion</h1>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100">
+            <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
+                <h2 className="text-3xl font-bold text-center mb-6">
+                    Connexion 🍔
+                </h2>
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    className="input w-full mb-3"
-                    onChange={(e) => setEmail(e.target.value)}
-                />
+                <form className="space-y-4">
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
 
-                <input
-                    type="password"
-                    placeholder="Mot de passe"
-                    className="input w-full mb-3"
-                    onChange={(e) => setMotDePasse(e.target.value)}
-                />
+                    <input
+                        type="password"
+                        placeholder="Mot de passe"
+                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
 
-                <button className="btn-primary w-full">Se connecter</button>
-            </form>
+                    <button className="w-full bg-orange-500 text-white py-3 rounded-xl hover:bg-orange-600 transition">
+                        Se connecter
+                    </button>
+                </form>
+
+                <p className="text-center text-sm text-gray-500 mt-4">
+                    Pas encore de compte ?{" "}
+                    <a href="/register" className="text-orange-500">
+                        Créer un compte
+                    </a>
+                </p>
+            </div>
         </div>
     );
 }

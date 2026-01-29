@@ -1,11 +1,11 @@
-
 package com.dualexpress.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -15,6 +15,7 @@ public class Role {
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
- // ADMIN, CLIENT, LIVREUR, RESTAURANT
+ // Ex: ADMIN, CLIENT, LIVREUR, RESTAURANT
+ @Column(nullable = false, unique = true)
  private String role;
 }

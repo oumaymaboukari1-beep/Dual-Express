@@ -1,9 +1,10 @@
+package com.dualexpress.controller;
+
 import com.dualexpress.dto.UtilisateurDTO;
 import com.dualexpress.dto.request.LoginRequest;
 import com.dualexpress.dto.request.RegisterRequest;
 import com.dualexpress.dto.response.LoginResponse;
 import com.dualexpress.service.UtilisateurService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/utilisateurs")
+@RequestMapping("/api/utilisateurs")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;

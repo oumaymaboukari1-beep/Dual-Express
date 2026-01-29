@@ -1,14 +1,15 @@
-
 package com.dualexpress.dto.request;
 
-import lombok.*;
+import com.dualexpress.model.enums.MethodePaiement;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class PaiementRequest {
 
+    @NotNull
     private Long commandeId;
-    private String methodePaiement;
-    // "CARTE_BANCAIRE", "PLUXEE", "ESPECE"
+
+    @NotNull
+    private MethodePaiement methodePaiement;
 }

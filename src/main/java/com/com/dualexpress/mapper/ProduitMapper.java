@@ -1,4 +1,3 @@
-
 package com.dualexpress.mapper;
 
 import com.dualexpress.dto.ProduitDTO;
@@ -12,9 +11,9 @@ public class ProduitMapper {
                 .nom(p.getNom())
                 .description(p.getDescription())
                 .prix(p.getPrix())
-                .categorie(p.getCategorie().toString())
+                .categorie(p.getCategorie() != null ? p.getCategorie().name() : null)
                 .disponible(p.getDisponible())
-                .restaurantId(p.getRestaurant().getId())
+                .restaurantId(p.getRestaurant() != null ? p.getRestaurant().getId() : null)
                 .build();
     }
 }

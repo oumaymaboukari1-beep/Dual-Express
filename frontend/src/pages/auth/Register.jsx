@@ -1,49 +1,31 @@
-// src/pages/auth/Register.jsx
-import { useState } from "react";
-import { register } from "../../api/authApi";
-
 export default function Register() {
-    const [form, setForm] = useState({
-        nom: "",
-        email: "",
-        motDePasse: "",
-        telephone: "",
-        adresse: "",
-        roleId: 2, // CLIENT par défaut
-    });
-
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await register(form);
-            alert("Compte créé avec succès !");
-        } catch (err) {
-            alert("Erreur lors de la création du compte");
-        }
-    };
-
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-96">
-                <h1 className="text-xl font-bold mb-4">Créer un compte</h1>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100">
+            <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
+                <h2 className="text-3xl font-bold text-center mb-6">
+                    Créer un compte 🍕
+                </h2>
 
-                <input name="nom" placeholder="Nom" className="input w-full mb-3" onChange={handleChange} />
-                <input name="email" placeholder="Email" className="input w-full mb-3" onChange={handleChange} />
-                <input name="motDePasse" type="password" placeholder="Mot de passe" className="input w-full mb-3" onChange={handleChange} />
-                <input name="telephone" placeholder="Téléphone" className="input w-full mb-3" onChange={handleChange} />
-                <input name="adresse" placeholder="Adresse" className="input w-full mb-3" onChange={handleChange} />
+                <form className="space-y-4">
+                    <input
+                        placeholder="Nom"
+                        className="w-full p-3 border rounded-xl"
+                    />
+                    <input
+                        placeholder="Email"
+                        className="w-full p-3 border rounded-xl"
+                    />
+                    <input
+                        type="password"
+                        placeholder="Mot de passe"
+                        className="w-full p-3 border rounded-xl"
+                    />
 
-                <select name="roleId" className="input w-full mb-3" onChange={handleChange}>
-                    <option value={2}>Client</option>
-                    <option value={3}>Livreur</option>
-                    <option value={4}>Restaurant</option>
-                </select>
-
-                <button className="btn-primary w-full">Créer un compte</button>
-            </form>
+                    <button className="w-full bg-orange-500 text-white py-3 rounded-xl hover:bg-orange-600">
+                        S’inscrire
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

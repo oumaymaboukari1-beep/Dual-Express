@@ -1,7 +1,8 @@
-
 package com.dualexpress.dto;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -14,9 +15,11 @@ public class CommandeDTO {
     private Long id;
     private Date dateCommande;
     private String statut;
-    private Double montantTotal;
-    private String adresseLivraison;
 
+    private BigDecimal montantTotal;
+    private BigDecimal fraisLivraison;
+
+    private String adresseLivraison;
     private Long utilisateurId;
     private Long restaurantId;
 

@@ -1,24 +1,29 @@
-
 package com.dualexpress.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.dualexpress.model.enums.Categorie;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Produit {
 
- @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+ @Id
+ @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
  private String nom;
  private String description;
- private Double prix;
+
+ @Column(nullable = false, precision = 10, scale = 2)
+ private BigDecimal prix;
 
  @Enumerated(EnumType.STRING)
  private Categorie categorie;

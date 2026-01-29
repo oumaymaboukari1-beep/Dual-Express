@@ -1,4 +1,3 @@
-
 package com.dualexpress.mapper;
 
 import com.dualexpress.dto.LigneCommandeDTO;
@@ -11,7 +10,7 @@ public class LigneCommandeMapper {
                 .id(lc.getId())
                 .quantite(lc.getQuantite())
                 .prixUnitaire(lc.getPrixUnitaire())
-                .produitId(lc.getProduit().getId())
+                .produitId(lc.getProduit() != null ? lc.getProduit().getId() : null)
                 .build();
     }
 }
