@@ -1,17 +1,12 @@
 // src/api/commandeApi.js
-import api from "./axios";
+import api from './axios';
 
-export const createCommande = async (data) => {
-    const res = await api.post("/commandes", data);
-    return res.data;
+export const createCommande = async (payload) => {
+    // {
+    //   utilisateurId, restaurantId, adresseLivraison,
+    //   lignes: [{ produitId, quantite }]
+    // }
+    return api.post('/commandes', payload);
 };
 
-export const getCommande = async (id) => {
-    const res = await api.get(`/commandes/${id}`);
-    return res.data;
-};
-
-export const getAllCommandes = async () => {
-    const res = await api.get("/commandes");
-    return res.data;
-};
+export const getCommandeById = async (id) => api.get(`/commandes/${id}`);

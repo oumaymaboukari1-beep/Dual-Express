@@ -1,41 +1,34 @@
 package com.dualexpress.controller;
 
 import com.dualexpress.dto.UtilisateurDTO;
-import com.dualexpress.dto.request.LoginRequest;
-import com.dualexpress.dto.request.RegisterRequest;
-import com.dualexpress.dto.response.LoginResponse;
-import com.dualexpress.service.UtilisateurService;
+import com.dualexpress.mapper.UtilisateurMapper;
+import com.dualexpress.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/utilisateurs")
+@RequestMapping("/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class UtilisateurController {
 
-    private final UtilisateurService utilisateurService;
-
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(utilisateurService.register(req));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
-        return ResponseEntity.ok(utilisateurService.login(req));
-    }
+    private final UtilisateurRepository utilisateurRepository;
 
     @GetMapping
-    public ResponseEntity<List<UtilisateurDTO>> getAll() {
-        return ResponseEntity.ok(utilisateurService.getAll());
+    public ResponseEntity<?> getAll() {
+        var list = utilisateurRepository.findAll()
+                .stream()
+                .map(UtilisateurMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(list);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UtilisateurDTO> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(utilisateurService.getById(id));
+    public ResponseEntity<?> getById(@PathVariable Long id) {
+        var u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+        return ResponseEntity.ok(UtilisateurMapper.toDTO(u));
     }
 }

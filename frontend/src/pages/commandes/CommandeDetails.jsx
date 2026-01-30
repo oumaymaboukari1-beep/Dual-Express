@@ -1,6 +1,5 @@
-// src/pages/commandes/CommandeDetails.jsx
 import { useEffect, useState } from "react";
-import { getCommande } from "../../api/commandeApi";
+import { getCommandeById } from "../../api/commandeApi";
 import { useParams } from "react-router-dom";
 
 export default function CommandeDetails() {
@@ -8,7 +7,7 @@ export default function CommandeDetails() {
     const [commande, setCommande] = useState(null);
 
     useEffect(() => {
-        getCommande(id).then(setCommande);
+        getCommandeById(id).then((res) => setCommande(res.data));
     }, [id]);
 
     if (!commande) return <p>Chargement...</p>;

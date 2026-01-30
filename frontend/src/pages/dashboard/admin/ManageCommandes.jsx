@@ -1,41 +1,61 @@
-// src/pages/dashboard/admin/ManageCommandes.jsx
-import { useEffect, useState } from "react";
 import api from "../../../api/axios";
+import StatusPill from "../../../components/StatusPill";
 
-export default function ManageCommandes() {
-    const [commandes, setCommandes] = useState([]);
+const ManageCommandes = () => {
+    const [rows, setRows] = useState([]);
 
-    useEffect(() => {
-        api.get("/commandes").then((res) => setCommandes(res.data));
-    }, []);
+    const fetchData = async () => {
+        // TODO: expose un GET /admin/commandes (ici, je simule avec /commandes?status=EN_COURS si tu ajoutes)
+        // Pour MVP, charge des données de test depuis /restaurants + /produits
+    };
+
+    useEffect(() => { fetchData(); }, []);
+
+    const accept = async (id) => {
+        // await api.patch(`/resto/commandes/${id}/accept`);
+        // await fetchData();
+    };
+
+    const cancel = async (id) => {
+        // await api.patch(`/admin/commandes/${id}/cancel`);
+        // await fetchData();
+    };
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold">Gestion des Commandes</h1>
-
-            <table className="table-auto w-full mt-6 border">
-                <thead className="bg-gray-200">
-                <tr>
-                    <th>ID</th>
-                    <th>Client</th>
-                    <th>Restaurant</th>
-                    <th>Montant</th>
-                    <th>Statut</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                {commandes.map((c) => (
-                    <tr key={c.id} className="border">
-                        <td>{c.id}</td>
-                        <td>{c.utilisateurId}</td>
-                        <td>{c.restaurantId}</td>
-                        <td>{c.montantTotal}</td>
-                        <td>{c.statut}</td>
+        <div className="glass p-4 shadow-soft">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Commandes</h3>
+                <input className="input input-bordered input-sm w-64" placeholder="Rechercher..." />
+            </div>
+            <div className="overflow-x-auto">
+                <table className="table table-zebra">
+                    <thead>
+                    <tr>
+                        <th>ID</th><th>Client</th><th>Restaurant</th><th>Montant</th><th>Statut</th><th>Actions</th>
                     </tr>
-                ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {rows.map((r) => (
+                        <tr key={r.id}>
+                            <td>{r.id}</td>
+                            <td>{r.utilisateurId}</td>
+                            <td>{r.restaurantId}</td>
+                            <td>{r.montantTotal} TND</td>
+                            <td><StatusPill statut={r.statut} /></td>
+                            <td className="space-x-2">
+                                <button className="btn btn-xs btn-success" onClick={() => accept(r.id)}>Accepter</button>
+                                <button className="btn btn-xs btn-error" onClick={() => cancel(r.id)}>Annuler</button>
+                            </td>
+                        </tr>
+                    ))}
+                    {rows.length === 0 && (
+                        <tr><td colSpan="6" className="text-center opacity-60 py-10">Aucune commande</td></tr>
+                    )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
-}
+};
+
+export default ManageCommandes;

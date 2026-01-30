@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useUserStore } from "../store/userStore";
+import useUserStore from "../store/userStore";
 
 export default function Navbar() {
     const user = useUserStore((s) => s.user);

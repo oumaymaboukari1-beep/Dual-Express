@@ -1,4 +1,3 @@
-// src/store/restaurantStore.js
 import { create } from "zustand";
 
 export const useRestaurantStore = create((set) => ({

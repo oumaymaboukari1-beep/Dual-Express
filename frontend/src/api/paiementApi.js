@@ -1,10 +1,7 @@
 // src/api/paiementApi.js
-import api from "./axios";
+import api from './axios';
 
-export const payer = async (commandeId, methodePaiement) => {
-    const res = await api.post("/paiements", {
-        commandeId,
-        methodePaiement,
-    });
-    return res.data;
+export const payerCommande = async ({ commandeId, methodePaiement }) => {
+    // methodePaiement: "ESPECE" | "CARTE_BANCAIRE" | "CARTE_SODEXO"
+    return api.post('/paiements', { commandeId, methodePaiement });
 };

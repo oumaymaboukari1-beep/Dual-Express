@@ -1,4 +1,4 @@
-// src/store/produitStore.js
+
 import { create } from "zustand";
 
 export const useProduitStore = create((set) => ({

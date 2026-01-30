@@ -1,103 +1,142 @@
-import { Routes, Route } from "react-router-dom";
-import Layout from "../components/Layout";
-import ProtectedRoute from "../components/ProtectedRoute";
+// src/routes/AppRoutes.jsx
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+import Layout from '../components/Layout';
+import ProtectedRoute from '../components/ProtectedRoute';
+import RoleRoute from '../components/RoleRoute';
+import useUserStore from '../store/userStore';
 
 // Auth
-import Login from "../pages/auth/Login.jsx";
+<Route path="/login" element={<LoginRegister />} />
+<Route path="/register" element={<LoginRegister />} />
 
-// Dashboard
-import Dashboard from "../pages/Dashboard";
-
-// Produits
-import ListeProduits from "../pages/Produit/ListeProduits";
-import AjouterProduit from "../pages/Produit/AjouterProduit";
-import ModifierProduit from "../pages/Produit/ModifierProduit";
-
-// Restaurant
-import GererCommandes from "../pages/dashboard/Restaurant/GererCommandes.jsx";
-import RestaurantHome from "../pages/dashboard/Restaurant/RestaurantHome.jsx";
-import GererProduits from "../pages/dashboard/Restaurant/GererProduits.jsx";
+// Pages après login
+import RestaurantList from '../pages/restaurants/RestaurantList';
+import RestaurantDetails from '../pages/restaurants/RestaurantDetails';
 
 // Commandes
-import ListeCommandes from "../pages/Commande/ListeCommandes";
-import AjouterCommande from "../pages/Commande/AjouterCommande";
-import ModifierCommande from "../pages/Commande/ModifierCommande";
+import Checkout from '../pages/commandes/Checkout';
+import CommandeDetails from '../pages/commandes/CommandeDetails';
 
-// Client
-import RestaurantList from "../pages/restaurants/RestaurantList.jsx";
-import RestaurantDetails from "../pages/restaurants/RestaurantDetails.jsx";
-import ListeLignesCommande from "../pages/restaurants/ListeLignesCommande";
+// Dashboards
+import AdminHome from '../pages/dashboard/admin/AdminHome';
+import ManageCommandes from '../pages/dashboard/admin/ManageCommandes';
+import ManageRestaurants from '../pages/dashboard/admin/ManageRestaurants';
+import ManageUsers from '../pages/dashboard/admin/ManageUsers';
 
-// Paiements
-import CommandeDetails from "../pages/commandes/CommandeDetails.jsx";
-import Checkout from "../pages/commandes/Checkout.jsx";
-import ModifierPaiement from "../pages/commandes/ModifierPaiement";
+const AppRoutes = () => {
+    const fetchMe = useUserStore((s) => s.fetchMe);
 
-// Livreur
-import ListeUtilisateurs from "../pages/dashboard/livreur/ListeUtilisateurs";
-import LivreurHome from "../pages/dashboard/livreur/LivreurHome.jsx";
-import MesLivraisons from "../pages/dashboard/livreur/MesLivraisons.jsx";
+    useEffect(() => {
+        fetchMe();
+    }, [fetchMe]);
 
-// Client dashboard
-import MesCommandes from "../pages/dashboard/client/MesCommandes.jsx";
-import ClientHome from "../pages/dashboard/client/ClientHome.jsx";
-import ModifierRole from "../pages/dashboard/client/ModifierRole";
-
-export default function AppRoutes() {
     return (
         <Routes>
-            {/* ✅ AUTH (PUBLIC) */}
-            <Route path="/" element={<Login />} />
 
-            {/* ✅ APP PROTÉGÉE */}
-            <Route
-                element={
-                    <ProtectedRoute>
-                        <Layout />
-                    </ProtectedRoute>
-                }
-            >
-                {/* Dashboard */}
-                <Route path="/dashboard" element={<Dashboard />} />
+            {/* === ROUTES AUTH SANS LAYOUT === */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-                {/* Produits */}
-                <Route path="/produits" element={<ListeProduits />} />
-                <Route path="/produits/add" element={<AjouterProduit />} />
-                <Route path="/produits/edit/:id" element={<ModifierProduit />} />
+            {/* === ROUTE PAR DÉFAUT === */}
+            {/* / → /home (protégé → redirige vers /login si non connecté) */}
+            <Route path="/" element={<Navigate to="/home" replace />} />
 
-                {/* Restaurant */}
-                <Route path="/restaurants" element={<GererCommandes />} />
-                <Route path="/restaurants/add" element={<RestaurantHome />} />
-                <Route path="/restaurants/edit/:id" element={<GererProduits />} />
+            {/* === ROUTES AVEC LAYOUT === */}
+            <Route element={<Layout />}>
 
-                {/* Commandes */}
-                <Route path="/commandes" element={<ListeCommandes />} />
-                <Route path="/commandes/add" element={<AjouterCommande />} />
-                <Route path="/commandes/edit/:id" element={<ModifierCommande />} />
-
-                {/* Ligne commandes (client) */}
-                <Route path="/ligne-commandes" element={<ListeLignesCommande />} />
-                <Route path="/ligne-commandes/add" element={<RestaurantList />} />
+                {/* HOME = liste restaurants */}
                 <Route
-                    path="/ligne-commandes/edit/:id"
-                    element={<RestaurantDetails />}
+                    path="/home"
+                    element={
+                        <ProtectedRoute>
+                            <RestaurantList />
+                        </ProtectedRoute>
+                    }
                 />
 
-                {/* Paiements */}
-                <Route path="/paiements" element={<CommandeDetails />} />
-                <Route path="/paiements/add" element={<Checkout />} />
-                <Route path="/paiements/edit/:id" element={<ModifierPaiement />} />
+                {/* RESTAURANTS */}
+                <Route
+                    path="/restaurants"
+                    element={
+                        <ProtectedRoute>
+                            <RestaurantList />
+                        </ProtectedRoute>
+                    }
+                />
 
-                {/* Livreur */}
-                <Route path="/utilisateurs" element={<ListeUtilisateurs />} />
-                <Route path="/utilisateurs/add" element={<LivreurHome />} />
-                <Route path="/utilisateurs/edit/:id" element={<MesLivraisons />} />
+                <Route
+                    path="/restaurants/:id"
+                    element={
+                        <ProtectedRoute>
+                            <RestaurantDetails />
+                        </ProtectedRoute>
+                    }
+                />
 
-                {/* Client */}
-                <Route path="/roles" element={<MesCommandes />} />
-                <Route path="/roles/add" element={<ClientHome />} />
-                <Route path="/roles/edit/:id" element={<ModifierRole />} />
+                {/* COMMANDES */}
+                <Route
+                    path="/checkout"
+                    element={
+                        <ProtectedRoute>
+                            <Checkout />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/commandes/:id"
+                    element={
+                        <ProtectedRoute>
+                            <CommandeDetails />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* ADMIN */}
+                <Route
+                    path="/dashboard/admin"
+                    element={
+                        <RoleRoute roles={['ADMIN']}>
+                            <AdminHome />
+                        </RoleRoute>
+                    }
+                />
+
+                <Route
+                    path="/dashboard/admin/commandes"
+                    element={
+                        <RoleRoute roles={['ADMIN']}>
+                            <ManageCommandes />
+                        </RoleRoute>
+                    }
+                />
+
+                <Route
+                    path="/dashboard/admin/restaurants"
+                    element={
+                        <RoleRoute roles={['ADMIN']}>
+                            <ManageRestaurants />
+                        </RoleRoute>
+                    }
+                />
+
+                <Route
+                    path="/dashboard/admin/users"
+                    element={
+                        <RoleRoute roles={['ADMIN']}>
+                            <ManageUsers />
+                        </RoleRoute>
+                    }
+                />
+
             </Route>
+
+            {/* 404 / fallback */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
     );
-}
+};
+
+export default AppRoutes;

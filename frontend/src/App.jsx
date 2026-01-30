@@ -1,45 +1,56 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
 
+// AUTH
+import LoginRegister from "./pages/auth/LoginRegister";
+
+// PUBLIC
 import RestaurantList from "./pages/restaurants/RestaurantList";
 import RestaurantDetails from "./pages/restaurants/RestaurantDetails";
 
+// CHECKOUT
 import Checkout from "./pages/commandes/Checkout";
 import CommandeDetails from "./pages/commandes/CommandeDetails";
 
+// CLIENT
 import ClientHome from "./pages/dashboard/client/ClientHome";
 import MesCommandes from "./pages/dashboard/client/MesCommandes";
 
+// ADMIN
 import AdminHome from "./pages/dashboard/admin/AdminHome";
 import ManageUsers from "./pages/dashboard/admin/ManageUsers";
 import ManageRestaurants from "./pages/dashboard/admin/ManageRestaurants";
 import ManageCommandes from "./pages/dashboard/admin/ManageCommandes";
 
+// RESTAURANT
 import RestaurantHome from "./pages/dashboard/restaurant/RestaurantHome";
 import GererProduits from "./pages/dashboard/restaurant/GererProduits";
 import GererCommandes from "./pages/dashboard/restaurant/GererCommandes";
 
+// LIVREUR
 import LivreurHome from "./pages/dashboard/livreur/LivreurHome";
 import MesLivraisons from "./pages/dashboard/livreur/MesLivraisons";
 
+// ROLE ROUTE
 import RoleRoute from "./components/RoleRoute";
 
 export default function App() {
     return (
-        <BrowserRouter>
+        <>
             <Navbar />
-            <Routes>
 
-                {/* AUTH */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+            <Routes>
+                {/* LOGIN / REGISTER */}
+                <Route path="/" element={<LoginRegister />} />
+                <Route path="/login" element={<LoginRegister />} />
+                <Route path="/register" element={<LoginRegister />} />
+
+                {/* HOME AFTER LOGIN */}
+                <Route path="/home" element={<RestaurantList />} />
 
                 {/* PUBLIC */}
-                <Route path="/" element={<RestaurantList />} />
-                <Route path="/restaurant/:id" element={<RestaurantDetails />} />
+                <Route path="/restaurants/:id" element={<RestaurantDetails />} />
 
                 {/* CHECKOUT */}
                 <Route path="/checkout" element={<Checkout />} />
@@ -72,7 +83,6 @@ export default function App() {
                         </RoleRoute>
                     }
                 />
-
                 <Route
                     path="/restaurant/produits"
                     element={
@@ -81,7 +91,6 @@ export default function App() {
                         </RoleRoute>
                     }
                 />
-
                 <Route
                     path="/restaurant/commandes"
                     element={
@@ -118,7 +127,6 @@ export default function App() {
                         </RoleRoute>
                     }
                 />
-
                 <Route
                     path="/admin/users"
                     element={
@@ -127,7 +135,6 @@ export default function App() {
                         </RoleRoute>
                     }
                 />
-
                 <Route
                     path="/admin/restaurants"
                     element={
@@ -136,7 +143,6 @@ export default function App() {
                         </RoleRoute>
                     }
                 />
-
                 <Route
                     path="/admin/commandes"
                     element={
@@ -145,8 +151,7 @@ export default function App() {
                         </RoleRoute>
                     }
                 />
-
             </Routes>
-        </BrowserRouter>
+        </>
     );
 }

@@ -1,12 +1,6 @@
-// ✅ AUCUN JSX ICI
 import api from "./axios";
 
-export const getRestaurants = async () => {
-    const res = await api.get("/restaurants");
-    return res.data;
-};
+export const getRestaurants = () => api.get("/restaurants");
 
-export const getRestaurantById = async (id) => {
-    const res = await api.get(`/restaurants/${id}`);
-    return res.data;
-};
+export const getRestaurantById = (id) =>
+    api.get(`/restaurants/${id}`);

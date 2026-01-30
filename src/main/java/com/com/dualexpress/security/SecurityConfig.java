@@ -1,20 +1,22 @@
+// src/main/java/com/dualexpress/security/SecurityConfig.java
 package com.dualexpress.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,104 +25,79 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // 👉 à adapter selon ton front
+    // FRONT origins (pas le back) – ajuste selon ton front (5173 pour Vite, 3000 pour CRA)
     private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
-            "http://localhost:3000",            // React local
-            "https://dualexpress.dev"           // ton domaine (si tu as)
+            "http://localhost:5173",
+            "http://localhost:3000"
     );
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   HandlerMappingIntrospector introspector) throws Exception {
-
-        MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // --- CORS pour cookie de session entre domaines ---
                 .cors(Customizer.withDefaults())
-
-                // --- CSRF protégé pour SPA: cookie lisible + exceptions sur /auth/** et Swagger ---
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
-                                mvc.pattern("/auth/**"),
-                                mvc.pattern("/v3/api-docs/**"),
-                                mvc.pattern("/swagger-ui/**"),
-                                mvc.pattern("/swagger-ui.html")
+                                // Swagger & H2
+                                new AntPathRequestMatcher("/v3/api-docs/**"),
+                                new AntPathRequestMatcher("/swagger-ui/**"),
+                                new AntPathRequestMatcher("/swagger-ui.html"),
+                                new AntPathRequestMatcher("/h2-console/**"),
+                                // Auth (register/login)
+                                new AntPathRequestMatcher("/auth/**")
                         )
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
-
-                // --- Form Login par défaut (session) ---
-                .formLogin(form -> form
-                        .loginProcessingUrl("/auth/login")    // POST username & password
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/auth/logout")             // POST (ou GET si tu veux, mais déconseillé)
-                        .deleteCookies("JSESSIONID")
-                        .clearAuthentication(true)
-                        .invalidateHttpSession(true)
-                        .permitAll()
-                )
+                .formLogin(form -> form.disable())   // pas de page /login HTML
                 .httpBasic(basic -> basic.disable())
-
-                // --- AUTORISATIONS ---
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger & erreurs
-                        .requestMatchers(
-                                mvc.pattern("/v3/api-docs/**"),
-                                mvc.pattern("/swagger-ui/**"),
-                                mvc.pattern("/swagger-ui.html"),
-                                mvc.pattern("/error"),
-                                mvc.pattern("/actuator/**")
-                        ).permitAll()
+                        // Swagger & H2
+                        .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
 
-                        // Auth endpoints en libre accès
-                        .requestMatchers(mvc.pattern("/auth/**")).permitAll()
+                        // Santé / racine (optionnel pour voir "ça tourne")
+                        .requestMatchers(new AntPathRequestMatcher("/"), new AntPathRequestMatcher("/health")).permitAll()
 
-                        // Ressources publiques (si tu en as)
+                        // Auth
+                        .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
+
+                        // Publics GET
                         .requestMatchers(HttpMethod.GET, "/restaurants/**", "/produits/**").permitAll()
 
-                        // Dashboards protégés par rôle (exemples)
-                        .requestMatchers(mvc.pattern("/admin/**")).hasRole("ADMIN")
-                        .requestMatchers(mvc.pattern("/resto/**")).hasAnyRole("RESTAURANT", "ADMIN")
-                        .requestMatchers(mvc.pattern("/livreur/**")).hasAnyRole("LIVREUR", "ADMIN")
-                        .requestMatchers(mvc.pattern("/client/**")).hasAnyRole("CLIENT", "ADMIN")
+                        // Zones par rôle (si tu les utilises déjà)
+                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/resto/**")).hasAnyRole("RESTAURANT","ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/livreur/**")).hasAnyRole("LIVREUR","ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/client/**")).hasAnyRole("CLIENT","ADMIN")
 
-                        // Le reste nécessite une session authentifiée
+                        // Tout le reste nécessite authentification
                         .anyRequest().authenticated()
                 )
-
-                // Désactive X-Frame-Options si tu utilises la console H2
-                .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+                .headers(h -> h.frameOptions(f -> f.disable()));
 
         return http.build();
     }
 
-    // CORS pour React (cookies + méthodes)
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(ALLOWED_ORIGINS);
-        cfg.setAllowedMethods(Arrays.asList("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        cfg.setAllowedHeaders(Arrays.asList("Authorization","Content-Type","X-XSRF-TOKEN"));
+        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
-    }
-
-    @Bean
-    public HandlerMappingIntrospector handlerMappingIntrospector() {
-        return new HandlerMappingIntrospector();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

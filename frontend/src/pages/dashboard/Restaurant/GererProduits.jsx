@@ -1,7 +1,7 @@
 // src/pages/dashboard/restaurant/GererProduits.jsx
 import { useEffect, useState } from "react";
 import api from "../../../api/axios";
-import { useUserStore } from "../../../store/userStore";
+import useUserStore from "../../../store/userStore.jsx";
 
 export default function GererProduits() {
     const [produits, setProduits] = useState([]);

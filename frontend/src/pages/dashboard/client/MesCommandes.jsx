@@ -1,7 +1,7 @@
 // src/pages/dashboard/client/MesCommandes.jsx
 import { useEffect, useState } from "react";
 import api from "../../../api/axios";
-import { useUserStore } from "../../../store/userStore";
+import useUserStore from "../../../store/userStore.jsx";
 import { Link } from "react-router-dom";
 
 export default function MesCommandes() {

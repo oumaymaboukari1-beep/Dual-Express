@@ -1,18 +1,17 @@
 package com.dualexpress.service;
 
-import com.dualexpress.dto.UtilisateurDTO;
-import com.dualexpress.dto.request.LoginRequest;
-import com.dualexpress.dto.request.RegisterRequest;
-import com.dualexpress.dto.response.LoginResponse;
-import com.dualexpress.mapper.UtilisateurMapper;
+import com.dualexpress.dto.AuthDtos.RegisterRequest;
 import com.dualexpress.model.Role;
 import com.dualexpress.model.Utilisateur;
 import com.dualexpress.repository.RoleRepository;
 import com.dualexpress.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,60 +19,40 @@ public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    /* ---------- REGISTER ---------- */
+    @Transactional
     public String register(RegisterRequest req) {
 
-        if (utilisateurRepository.findByEmail(req.getEmail()).isPresent()) {
+        if (utilisateurRepository.existsByEmail(req.getEmail())) {
             throw new RuntimeException("Email déjà utilisé !");
         }
+        if (utilisateurRepository.existsByUsername(req.getUsername())) {
+            throw new RuntimeException("Username déjà pris !");
+        }
 
-        Role role = roleRepository.findById(req.getRoleId())
-                .orElseThrow(() -> new RuntimeException("Rôle introuvable"));
+        Set<Role> roles = (req.getRoles() == null || req.getRoles().isEmpty())
+                ? Set.of(getOrCreateRole("CLIENT"))
+                : req.getRoles().stream().map(this::getOrCreateRole).collect(Collectors.toSet());
 
-        Utilisateur user = Utilisateur.builder()
-                .nom(req.getNom())
+        Utilisateur u = Utilisateur.builder()
+                .username(req.getUsername())
+                .password(passwordEncoder.encode(req.getPassword()))
                 .email(req.getEmail())
-                .motDePasse(req.getMotDePasse()) // PAS CRYPTÉ
-                .telephone(req.getTelephone())
-                .adresse(req.getAdresse())
-                .role(role)
-                .disponibilite(
-                        role.getRole().equalsIgnoreCase("LIVREUR")
-                )
+                .fullName(req.getFullName())
+                .roles(roles)
+                .enabled(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
                 .build();
 
-        utilisateurRepository.save(user);
-
-        return "Utilisateur créé avec succès";
+        utilisateurRepository.save(u);
+        return "Inscription réussie";
     }
 
-    /* ---------- LOGIN ---------- */
-    public LoginResponse login(LoginRequest req) {
-
-        Utilisateur user = utilisateurRepository
-                .findByEmailAndMotDePasse(req.getEmail(), req.getMotDePasse())
-                .orElseThrow(() -> new RuntimeException("Email ou mot de passe incorrect"));
-
-        return LoginResponse.builder()
-                .id(user.getId())
-                .nom(user.getNom())
-                .role(user.getRole().getRole()) // ADMIN / CLIENT / RESTAURANT / LIVREUR
-                .build();
-    }
-
-    /* ---------- GET ALL USERS ---------- */
-    public List<UtilisateurDTO> getAll() {
-        return utilisateurRepository.findAll()
-                .stream()
-                .map(UtilisateurMapper::toDTO)
-                .toList();
-    }
-
-    /* ---------- GET USER BY ID ---------- */
-    public UtilisateurDTO getById(Long id) {
-        Utilisateur u = utilisateurRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        return UtilisateurMapper.toDTO(u);
+    private Role getOrCreateRole(String roleName) {
+        return roleRepository.findByRole(roleName)
+                .orElseGet(() -> roleRepository.save(Role.builder().role(roleName).build()));
     }
 }

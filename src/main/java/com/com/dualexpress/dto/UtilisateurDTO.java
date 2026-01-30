@@ -1,19 +1,17 @@
-
 package com.dualexpress.dto;
 
 import lombok.*;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class UtilisateurDTO {
-
     private Long id;
-    private String nom;
+    private String username;
     private String email;
-    private String telephone;
-    private String adresse;
-    private String role;
-    private Boolean disponibilite;
+    private String fullName;
+    private Set<String> roles;
+    private boolean enabled;
 }

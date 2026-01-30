@@ -1,36 +1,42 @@
-export default function Login() {
+// src/pages/auth/Login.jsx
+import React, { useState } from 'react';
+import { login, me } from '../../api/authApi';
+import useUserStore from '../../store/userStore';
+import { useNavigate } from 'react-router-dom';
+
+const Login = () => {
+    const navigate = useNavigate();
+    const setUser = useUserStore((s) => s.setUser);
+
+    const [form, setForm] = useState({ username: '', password: '' });
+    const [error, setError] = useState('');
+
+    const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try {
+            await login(form);         // Controller crée la session
+            const { data } = await me(); // Controller renvoie le Model (user + roles)
+            setUser(data);
+            navigate('/');
+        } catch (err) {
+            setError(err?.response?.data?.message || 'Échec de connexion');
+        }
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100">
-            <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
-                <h2 className="text-3xl font-bold text-center mb-6">
-                    Connexion 🍔
-                </h2>
-
-                <form className="space-y-4">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    />
-
-                    <input
-                        type="password"
-                        placeholder="Mot de passe"
-                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    />
-
-                    <button className="w-full bg-orange-500 text-white py-3 rounded-xl hover:bg-orange-600 transition">
-                        Se connecter
-                    </button>
-                </form>
-
-                <p className="text-center text-sm text-gray-500 mt-4">
-                    Pas encore de compte ?{" "}
-                    <a href="/register" className="text-orange-500">
-                        Créer un compte
-                    </a>
-                </p>
-            </div>
+        <div className="login-container">
+            <h2>Connexion</h2>
+            <form onSubmit={onSubmit}>
+                <input name="username" value={form.username} onChange={onChange} placeholder="Email ou username" />
+                <input type="password" name="password" value={form.password} onChange={onChange} placeholder="Mot de passe" />
+                <button type="submit">Se connecter</button>
+            </form>
+            {error && <p style={{color:'red'}}>{error}</p>}
         </div>
     );
-}
+};
+
+export default Login;

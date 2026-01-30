@@ -1,6 +1,6 @@
 // src/pages/dashboard/client/ClientHome.jsx
 import { Link } from "react-router-dom";
-import { useUserStore } from "../../../store/userStore";
+import useUserStore from "../../../store/userStore.jsx";
 
 export default function ClientHome() {
     const user = useUserStore((s) => s.user);
